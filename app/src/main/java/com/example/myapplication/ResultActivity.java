@@ -9,56 +9,45 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class ResultActivity extends AppCompatActivity {
 
-    private TextView tvUserName, tvScore, tvMessage;
-    private Button btnRestart, btnExit;
+    private TextView tvUserName, tvScore;
+    private Button btnShare, btnRestart;
+
+    private String userName;
+    private int score, totalQuestions;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_result);
 
-        // Retrieve data from intent
-        String userName = getIntent().getStringExtra("USER_NAME");
-        int score = getIntent().getIntExtra("SCORE", 0);
-        int totalQuestions = getIntent().getIntExtra("TOTAL", 0);
-
-        // Initialize UI components
         tvUserName = findViewById(R.id.tvUserName);
         tvScore = findViewById(R.id.tvScore);
-        tvMessage = findViewById(R.id.tvMessage);
+        btnShare = findViewById(R.id.btnShare);
         btnRestart = findViewById(R.id.btnRestart);
-        btnExit = findViewById(R.id.btnExit);
 
-        // Set values
-        tvUserName.setText("Player: " + userName);
-        tvScore.setText("Score: " + score + " / " + totalQuestions);
+        // Get Data from Intent
+        userName = getIntent().getStringExtra("USER_NAME");
+        score = getIntent().getIntExtra("SCORE", 0);
+        totalQuestions = getIntent().getIntExtra("TOTAL", 0);
 
-        // Display a message based on score
-        if (score == totalQuestions) {
-            tvMessage.setText("Excellent! You got a perfect score!");
-        } else if (score >= totalQuestions / 2) {
-            tvMessage.setText("Good job! You did well.");
-        } else {
-            tvMessage.setText("Keep practicing! You'll improve.");
-        }
+        // Set Text
+        tvUserName.setText("Congratulations, " + userName + "!");
+        tvScore.setText("Your Score: " + score + "/" + totalQuestions);
 
-        // Restart Quiz Button
-        btnRestart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(ResultActivity.this, QuizActivity.class);
-                intent.putExtra("USER_NAME", userName);
-                startActivity(intent);
-                finish();
-            }
+        // Share Score using Implicit Intent
+        btnShare.setOnClickListener(v -> {
+            String shareMessage = userName + " scored " + score + " out of " + totalQuestions + " in the Quiz App! 🎉";
+            Intent shareIntent = new Intent(Intent.ACTION_SEND);
+            shareIntent.setType("text/plain");
+            shareIntent.putExtra(Intent.EXTRA_TEXT, shareMessage);
+            startActivity(Intent.createChooser(shareIntent, "Share your score via"));
         });
 
-        // Exit Button
-        btnExit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finishAffinity(); // Closes all activities and exits the app
-            }
+        // Restart Quiz (Go back to MainActivity)
+        btnRestart.setOnClickListener(v -> {
+            Intent intent = new Intent(ResultActivity.this, MainActivity.class);
+            startActivity(intent);
+            finish();
         });
     }
 }
